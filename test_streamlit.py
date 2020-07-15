@@ -37,7 +37,8 @@ if st.button("ohlala"):
 
 start_button=st.button('Start')
 if start_button:
-    testval=ff.startFcn()
+    testval=ff.startFcn(handles)
+    st.write(testval)
     
 
 
