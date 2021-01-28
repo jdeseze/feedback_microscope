@@ -46,13 +46,14 @@ def go_to_pos(state,coord):
         
 def acquire(state):
     if state.soft:
-        pixvals=state.mm.RunJournal('C:/MM/app/mmproc/journals/s.JNL')
+        state.mm.RunJournal('C:/MM/app/mmproc/journals/s.JNL')
+        pixvals=np.array(Image.open('C:/TEMP/tmp.tif'))
     else:
         bridge=pm.Bridge()
         core=bridge.get_core()
         core.snap_image()
         tagged_img=core.get_tagged_image()
-    pixvals=np.reshape(tagged_img.pix,newshape=[tagged_img.tags['Height'], tagged_img.tags['Width']])
+        pixvals=np.reshape(tagged_img.pix,newshape=[tagged_img.tags['Height'], tagged_img.tags['Width']])
     contrasted = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
     state.disp_image=contrasted
     state.img_to_save=pixvals
