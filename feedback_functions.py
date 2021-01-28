@@ -1,89 +1,81 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jul 15 15:58:48 2020
+Created on Tue Oct 13 15:02:25 2020
 
 @author: Jean
 """
-import streamlit as st
-import time
-import classes as cl
-from pycromanager import Bridge
-from PIL import Image
+
 import numpy as np
-import types
-from datetime import datetime
-import updated_variables as uv
+import time
+
+from PIL import Image
+import copy
 import pandas as pd
+import threading
+import streamlit.report_thread as report_thread
+import random
+import sys
+from threading import Thread
+import time
+import pycromanager as pm
+import tifffile as tif
 
 
-@st.cache    
-def start_fcn(handles):
-    #timer=time.time
-    #init_time=int(timer)
-    handles.testval=time.perf_counter()-handles.init_time
-    return handles
-
-@st.cache(allow_output_mutation=True)
-def init_fcn(rand):
-    #handles=h.handles()
-    path=uv.__file__
-    with open(path,"w") as fp:
-        fp.writelines(['a=3 \n','b=12 \n'])
-    handles=types.SimpleNamespace()
-    handles.init_time=0
-    handles.test=1
-    handles.disp_image=Image.open('test.png')
-    handles.current_time_step=0
-    handles.testval=0
-    core=Bridge().get_core()
-    handles.core=core
-    handles.testval=0
-    handles.num_pos=2
-    handles.all_pos='./all_pos.pkl'
-    all_pos=pd.DataFrame(np.zeros([1,3]),columns=['x', 'y', 'z'])
-    all_pos.to_pickle('./all_pos.pkl')
-    handles.current_step=0
-    handles.num_steps=0
-    handles.num_WL=1
-    handles.current_WL=1
-    handles.session_id=np.random.rand()
-    return handles
-
-#@st.cache
-def start_acq(handles):
-    handles.acq=cl.PT(1,printer)
-    handles.acq.start()
-    #return acq
-
-def stop_acq(handles):
-    handles.acq.cancel()
-
-def printer():
-    tempo = datetime.today()
-    h,m,s = tempo.hour, tempo.minute, tempo.second
-    time=(f"{h}:{m}:{s}")
-    path=uv.__file__
-    with open(path,"w") as fp:
-        fp.writelines(['a=5 \n','b="'+time+'" \n'])
-    #return st.write((f"{h}:{m}:{s}"))
-
-#@st.cache
-def acq_fcn(handles):
-    handles.core.snap_image()
-    tagged_img=handles.core.get_tagged_image()
+def rep_acq(state):
+    if state.currentstep<state.nbsteps:
+        state.currentstep+=1
+        t=threading.Timer(state.timestep,rep_acq,[state])
+        t.start()
+        
+        all_pos=pd.read_pickle(state.all_pos)
+        for pos in range(all_pos.x.size):
+            x=all_pos.x[pos]
+            y=all_pos.y[pos]
+            go_to_pos(state,[x,y])
+            acquire_save(state)
+            
+            
+def go_to_pos(state,coord):
+    if state.soft:
+        pass
+    else:
+        bridge=pm.Bridge()
+        core=bridge.get_core()  
+        core.set_xy_position(coord[0],coord[1])
+        
+def acquire(state):
+    if state.soft:
+        pass
+    else:
+        bridge=pm.Bridge()
+        core=bridge.get_core()
+        core.snap_image()
+        tagged_img=core.get_tagged_image()
     pixvals=np.reshape(tagged_img.pix,newshape=[tagged_img.tags['Height'], tagged_img.tags['Width']])
-    pixvals = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
-    handles.disp_image=pixvals
-    #time.sleep(1)
-    #return handles
+    contrasted = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
+    state.disp_image=contrasted
+    state.img_to_save=pixvals
+    state.sync()
     
-@st.cache
-def get_table(string,num_pos,rand):
-    return pd.read_pickle(string)
-
-
-def add_pos(core,string):
+def acquire_save(state):
+    if state.soft:
+        pass
+    else:
+        bridge=pm.Bridge()
+        core=bridge.get_core()
+        core.snap_image()
+        tagged_img=core.get_tagged_image()
+    pixvals=np.reshape(tagged_img.pix,newshape=[tagged_img.tags['Height'], tagged_img.tags['Width']])
+    norm = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
+    state.disp_image=norm
+    #with Image.open('test.tif') as temp_img:
+    tif.imwrite('test.tif',pixvals,append=True)
+    state.sync()
+    
+def add_pos(state):
+    bridge=pm.Bridge()
+    core=bridge.get_core()    
     current_pos=pd.DataFrame(np.array([[core.get_x_position(),core.get_y_position(),core.get_position()]]),columns=['x', 'y', 'z'])
-    all_pos=pd.read_pickle(string)
+    all_pos=pd.read_pickle(state.all_pos)
     all_pos=all_pos.append(current_pos,ignore_index=True)
-    all_pos.to_pickle(string)
+    all_pos.to_pickle(state.all_pos)
