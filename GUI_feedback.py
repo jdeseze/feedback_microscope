@@ -13,6 +13,8 @@ import threading
 from SessionState import _get_state
 import feedback_functions as ff
 import time
+#pip install pythonnet !!!!
+import clr
 
 
 def main():
@@ -21,7 +23,11 @@ def main():
     state = _get_state()
     
     state.soft=st.sidebar.checkbox('Use Metamorph')
-    
+    if state.soft:
+        clr.AddReference('Interop.MMAppLib.dll')
+        import MMAppLib
+        state.mm=mm=MMAppLib.UserCallClass()
+        
     st.title("Test feedback acquisition function")
     
     if not state.all_pos:

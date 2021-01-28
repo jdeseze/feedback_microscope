@@ -21,6 +21,7 @@ import pycromanager as pm
 import tifffile as tif
 
 
+
 def rep_acq(state):
     if state.currentstep<state.nbsteps:
         state.currentstep+=1
@@ -45,7 +46,7 @@ def go_to_pos(state,coord):
         
 def acquire(state):
     if state.soft:
-        pass
+        pixvals=state.mm.RunJournal('C:/MM/app/mmproc/journals/s.JNL')
     else:
         bridge=pm.Bridge()
         core=bridge.get_core()
