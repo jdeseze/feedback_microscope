@@ -25,7 +25,7 @@ def main():
     
     state.soft=st.sidebar.checkbox('Use Metamorph')
     if state.soft:
-        clr.AddReference('Interop.MMAppLib.dll')
+        clr.AddReference('C:\dmd\Interop.MMAppLib.dll')
         import MMAppLib
         state.mm=MMAppLib.UserCallClass()
     else:
