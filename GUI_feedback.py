@@ -15,6 +15,7 @@ import feedback_functions as ff
 import time
 #pip install pythonnet !!!!
 import clr
+import pycromanager as pm
 
 
 def main():
@@ -26,7 +27,11 @@ def main():
     if state.soft:
         clr.AddReference('Interop.MMAppLib.dll')
         import MMAppLib
-        state.mm=mm=MMAppLib.UserCallClass()
+        state.mm=MMAppLib.UserCallClass()
+    else:
+        bridge=pm.Bridge()
+        core=bridge.get_core()  
+        #state[core]=core
         
     st.title("Test feedback acquisition function")
     
@@ -62,7 +67,7 @@ def main():
         if state.show_image:
             st.image(state.disp_image,use_column_width=True,output_format='PNG')
             #state.show_image=False
-        st.write(state.error)
+        #st.write(state.error)
 
         
     # in the sidebar, all the parameters are choosen
@@ -92,12 +97,6 @@ if __name__ == "__main__":
     a=time.time()
     main()
     b=time.time()
-    st.write(b-a)
+    #st.write(b-a)
     
-# =============================================================================
-#     state.slider = st.sidebar.slider("Set slider value.", 1, 10, state.slider)
-#     state.radio = st.sidebar.radio("Set radio value.", options, options.index(state.radio) if state.radio else 0)
-#     state.checkbox = st.sidebar.checkbox("Set checkbox value.", state.checkbox)
-#     state.selectbox = st.sidebar.selectbox("Select value.", options, options.index(state.selectbox) if state.selectbox else 0)
-#     state.multiselect = st.sidebar.multiselect("Select value(s).", options, state.multiselect)
-# =============================================================================
+

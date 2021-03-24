@@ -32,17 +32,29 @@ def rep_acq(state):
         for pos in range(all_pos.x.size):
             x=all_pos.x[pos]
             y=all_pos.y[pos]
-            go_to_pos(state,[x,y])
-            acquire_save(state)
+            z=all_pos.z[pos]
+            set_pos(state,[x,y,z])
+            for chan in state.channels:
+                set_wl(state,chan)
+                acquire_save(state,state.name_exp+str(pos)+'_'+chan+'.tif')
             
             
-def go_to_pos(state,coord):
+def set_pos(state,coord):
     if state.soft:
         pass
     else:
         bridge=pm.Bridge()
         core=bridge.get_core()  
         core.set_xy_position(coord[0],coord[1])
+        core.set_position(coord[2])
+        
+def set_wl(state,chan):
+    if state.soft:
+        pass
+    else:
+        bridge=pm.Bridge()
+        core=bridge.get_core()  
+        core.set_config('Channel',chan)    
         
 def acquire(state):
     if state.soft:
@@ -58,7 +70,7 @@ def acquire(state):
     state.img_to_save=pixvals
     state.sync()
     
-def acquire_save(state):
+def acquire_save(state,name):
     if state.soft:
         pass
     else:
@@ -70,7 +82,7 @@ def acquire_save(state):
     norm = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
     state.disp_image=norm
     #with Image.open('test.tif') as temp_img:
-    tif.imwrite('test.tif',pixvals,append=True)
+    tif.imwrite(name,pixvals,append=True)
     state.sync()
     
 def add_pos(state):
