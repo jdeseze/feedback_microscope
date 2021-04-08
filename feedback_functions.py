@@ -36,7 +36,7 @@ def rep_acq(state):
             set_pos(state,[x,y,z])
             for chan in state.channels:
                 set_wl(state,chan)
-                acquire_save(state,state.name_exp+str(pos)+'_'+chan+'.tif')
+                acquire_save(state,state.name_exp+'_'+str(pos)+'_'+chan+'.tif')
             
             
 def set_pos(state,coord):
