@@ -12,7 +12,6 @@ from PIL import Image
 import copy
 import pandas as pd
 import threading
-import streamlit.report_thread as report_thread
 import random
 import sys
 from threading import Thread
@@ -29,6 +28,7 @@ def rep_acq(state):
         t.start()
         
         all_pos=pd.read_pickle(state.all_pos)
+        
         for pos in range(all_pos.x.size):
             x=all_pos.x[pos]
             y=all_pos.y[pos]
@@ -37,6 +37,8 @@ def rep_acq(state):
             for chan in state.channels:
                 set_wl(state,chan)
                 acquire_save(state,state.name_exp+'_'+str(pos)+'_'+chan+'.tif')
+                #there we should analyse and change the positions
+                
             
             
 def set_pos(state,coord):
