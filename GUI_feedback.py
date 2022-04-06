@@ -19,6 +19,14 @@ import pycromanager as pm
 
 st.set_page_config(page_title="Feedback routine", page_icon=":microscope:",layout="wide")
 
+st.session_state['nbsteps']=0
+st.session_state['timestep']=''
+st.session_state['current_time_step']=1
+st.session_state['name_exp']=''
+st.session_state['comments']=''
+st.session_state['soft']=False
+st.session_state['channels']=['FITC']
+st.session_state.show_image=False
 
 st.session_state.soft=st.sidebar.checkbox('Use Metamorph')
 
@@ -30,26 +38,6 @@ else:
     bridge=pm.Bridge()
     core=bridge.get_core()  
     #state[core]=core
-
-# in the sidebar, all the parameters are choosen
-st.sidebar.title("Acquisition parameters")
-options = ["Hello", "World", "Goodbye"]
-
-time_settings=st.sidebar.expander("Time settings",expanded=False)
-with time_settings:
-    st.session_state.nbsteps=st.number_input('Number of steps',0,10000,st.session_state.nbsteps or 0)
-    st.session_state.timestep=st.number_input('Time step (in s)',0,100000,st.session_state.timestep or 0)  
-
-exp_settings=st.sidebar.beta_expander("Experiment settings")
-with exp_settings:
-    st.session_state.name_exp = st.text_input("Name of the experiment", st.session_state.name_exp or "")
-    st.session_state.comments = st.text_input("Comments", st.session_state.comments or "")
-
-ill_settings=st.sidebar.beta_expander("Illumination settings")
-with ill_settings:
-    #get setting of different channels
-    options=["FITC","DAPI","Cy5","GFP","Rhodamine"]
-    st.session_state.channels=st.multiselect("Select channels",options,st.session_state.channels)
 
     
 st.title("Test feedback acquisition function")
@@ -91,10 +79,25 @@ with c2:
         #st.session_state.show_image=False
     #st.write(st.session_state.error)
 
+# in the sidebar, all the parameters are choosen
+st.sidebar.title("Acquisition parameters")
+options = ["Hello", "World", "Goodbye"]
 
+time_settings=st.sidebar.expander("Time settings",expanded=False)
+with time_settings:
+    st.session_state.nbsteps=st.number_input('Number of steps',0,10000,st.session_state.nbsteps or 0)
+    st.session_state.timestep=st.number_input('Time step (in s)',0,100000,st.session_state.timestep or 0)  
 
-# Mandatory to avoid rollbacks with widgets, must be called at the end of your app
-st.session_state.sync()    
+exp_settings=st.sidebar.expander("Experiment settings")
+with exp_settings:
+    st.session_state.name_exp = st.text_input("Name of the experiment", st.session_state.name_exp or "")
+    st.session_state.comments = st.text_input("Comments", st.session_state.comments or "")
+
+ill_settings=st.sidebar.expander("Illumination settings")
+with ill_settings:
+    #get setting of different channels
+    options=["FITC","DAPI","Cy5","GFP","Rhodamine"]
+    st.session_state.channels=st.multiselect("Select channels",options,st.session_state.channels)
 
 
 

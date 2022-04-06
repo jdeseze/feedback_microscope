@@ -71,7 +71,6 @@ def acquire(state):
     contrasted = ((pixvals - pixvals.min()) / (pixvals.max()-pixvals.min())) 
     state.disp_image=contrasted
     state.img_to_save=pixvals
-    state.sync()
     
 def acquire_save(state,name):
     if state.soft:
@@ -86,7 +85,6 @@ def acquire_save(state,name):
     state.disp_image=norm
     #with Image.open('test.tif') as temp_img:
     tif.imwrite(name,pixvals,append=True)
-    state.sync()
     
 def add_pos(state):
     bridge=pm.Bridge()
